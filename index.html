@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Siva Sakthi P | React Profile Card</title>
+
+  <!-- React 18 & ReactDOM CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+  <!-- Babel Standalone CDN (to compile JSX in browser) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      transition: background-color 0.5s ease;
+    }
+
+    /* Glassmorphism Styles */
+    .glass {
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15);
+    }
+
+    .glass-dark {
+      background: rgba(17, 24, 39, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+    }
+
+    .glass-card-inner {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .glass-card-inner-dark {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Pulsing animations for background orbs */
+    @keyframes floatOrb {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-20px) scale(1.05); }
+    }
+    .animate-orb {
+      animation: floatOrb 8s ease-in-out infinite;
+    }
+    .animate-orb-delayed {
+      animation: floatOrb 10s ease-in-out infinite 2s;
+    }
+  </style>
+</head>
+
+<body class="antialiased selection:bg-purple-500 selection:text-white">
+
+  <!-- React mounting container -->
+  <div id="root"></div>
+
+  <!-- React Application Script -->
+  <script type="text/babel">
+
+    // Extract useState Hook from the global React object
+    const { useState } = React;
+
+    // =========================================================================
+    // COMPONENT: ProfileCard
+    // Demonstrates:
+    // 1. Functional Components
+    // 2. Props Destructuring
+    // 3. State Management with useState
+    // 4. Conditional Rendering & Dynamic CSS Classes
+    // 5. Event Handling (onClick)
+    // =========================================================================
+    function ProfileCard({
+      name,
+      role,
+      college,
+      location,
+      bio,
+      skills,
+      avatar,
+      github,
+      linkedin
+    }) {
+
+      // -----------------------------------------------------------------------
+      // REACT STATE 1: Dark Mode Toggle
+      // Controls whether the card is in dark mode (true) or light mode (false)
+      // -----------------------------------------------------------------------
+      const [isDark, setIsDark] = useState(false);
+
+      // -----------------------------------------------------------------------
+      // REACT STATE 2: Connect Button Status
+      // Tracks if the user has clicked "Connect"
+      // -----------------------------------------------------------------------
+      const [isConnected, setIsConnected] = useState(false);
+
+      // -----------------------------------------------------------------------
+      // REACT STATE 3: Like Counter & XP Bonus (+10 XP per like)
+      // Tracks number of likes and calculates bonus XP
+      // -----------------------------------------------------------------------
+      const [likes, setLikes] = useState(0);
+      const [likeBump, setLikeBump] = useState(false);
+
+      // Handler for theme toggle
+      const toggleTheme = () => {
+        setIsDark(prevDark => !prevDark);
+      };
+
+      // Handler for connection toggle
+      const toggleConnect = () => {
+        setIsConnected(prevConnected => !prevConnected);
+      };
+
+      // Handler for like button (+10 XP bonus feature)
+      const handleLike = () => {
+        setLikes(prevLikes => prevLikes + 1);
+        // Trigger a brief bounce animation
+        setLikeBump(true);
+        setTimeout(() => setLikeBump(false), 300);
+      };
+
+      // Calculate total XP gained (+10 XP per like)
+      const totalXP = likes * 10;
+
+      return (
+        <div className={`relative min-h-screen w-full flex items-center justify-center p-4 sm:p-6 lg:p-8 transition-colors duration-500 overflow-hidden ${
+          isDark
+            ? 'bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 text-slate-100'
+            : 'bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-slate-900'
+        }`}>
+
+          {/* Ambient background blur orbs for glowing glassmorphism depth */}
+          <div className="absolute top-12 left-12 w-64 h-64 md:w-96 md:h-96 rounded-full bg-purple-400/25 blur-3xl pointer-events-none animate-orb"></div>
+          <div className="absolute bottom-12 right-12 w-64 h-64 md:w-96 md:h-96 rounded-full bg-pink-400/25 blur-3xl pointer-events-none animate-orb-delayed"></div>
+
+          {/* THEME TOGGLE BUTTON (TOP RIGHT) */}
+          <button
+            onClick={toggleTheme}
+            className={`fixed top-5 right-5 z-20 flex items-center gap-2 px-4 py-2.5 rounded-full shadow-lg transition-all duration-300 hover:scale-105 active:scale-95 ${
+              isDark
+                ? 'bg-slate-800/80 text-amber-300 border border-slate-700 hover:bg-slate-700/90'
+                : 'bg-white/80 text-slate-800 border border-white/50 hover:bg-white'
+            }`}
+            title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            aria-label="Toggle Theme"
+          >
+            <span className="text-lg">{isDark ? '☀️' : '🌙'}</span>
+            <span className="text-xs font-semibold tracking-wide hidden sm:inline">
+              {isDark ? 'Light Mode' : 'Dark Mode'}
+            </span>
+          </button>
+
+          {/* MAIN PROFILE CARD */}
+          <div className={`relative z-10 w-full max-w-md rounded-3xl p-6 sm:p-8 transition-all duration-300 ${
+            isDark ? 'glass-dark' : 'glass'
+          }`}>
+
+            {/* CARD TOP DECORATIVE HEADER / STATUS BADGE */}
+            <div className="flex items-center justify-between mb-6">
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${
+                isDark
+                  ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20'
+                  : 'bg-emerald-500/20 text-emerald-900 border border-emerald-500/30'
+              }`}>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                <span>Open to Opportunities</span>
+              </span>
+
+              {/* XP Bonus Badge */}
+              <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                isDark
+                  ? 'bg-amber-400/10 text-amber-300 border border-amber-400/20'
+                  : 'bg-amber-400/20 text-amber-900 border border-amber-400/30'
+              }`}>
+                ⭐ {totalXP} XP
+              </span>
+            </div>
+
+            {/* PROFILE PHOTO WITH GLASS RING */}
+            <div className="flex justify-center mb-5">
+              <div className="relative group">
+                <div className={`absolute -inset-1 rounded-full opacity-75 blur-sm transition-all duration-300 group-hover:opacity-100 ${
+                  isDark
+                    ? 'bg-gradient-to-r from-purple-600 to-pink-600'
+                    : 'bg-gradient-to-r from-pink-400 to-purple-400'
+                }`}></div>
+                <img
+                  src={avatar}
+                  alt={name}
+                  className="relative w-32 h-32 sm:w-36 sm:h-36 rounded-full object-cover object-top border-4 border-white/60 shadow-2xl transition-transform duration-300 group-hover:scale-105"
+                  onError={(e) => {
+                    // Fallback to initial avatar if path is not found
+                    e.target.onerror = null;
+                    e.target.src = "https://ui-avatars.com/api/?name=Siva+Sakthi&background=6366f1&color=fff&size=256";
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* NAME, ROLE & ACADEMIC INFO */}
+            <div className="text-center mb-5">
+              <h1 className={`text-2xl sm:text-3xl font-extrabold tracking-tight mb-1 ${
+                isDark ? 'text-white' : 'text-slate-900'
+              }`}>
+                {name}
+              </h1>
+
+              <p className={`text-sm sm:text-base font-medium mb-3 ${
+                isDark ? 'text-purple-300' : 'text-purple-950 font-semibold'
+              }`}>
+                {role}
+              </p>
+
+              {/* Metadata Badges: College & Location */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-2 text-xs">
+                {college && (
+                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg ${
+                    isDark ? 'text-slate-300 bg-white/5' : 'text-slate-800 bg-white/40'
+                  }`}>
+                    🎓 {college}
+                  </span>
+                )}
+                {location && (
+                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg ${
+                    isDark ? 'text-slate-300 bg-white/5' : 'text-slate-800 bg-white/40'
+                  }`}>
+                    📍 {location}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* ABOUT ME / BIO */}
+            <div className={`p-4 rounded-2xl mb-5 text-sm leading-relaxed text-center ${
+              isDark ? 'glass-card-inner-dark text-slate-200' : 'glass-card-inner text-slate-800'
+            }`}>
+              "{bio}"
+            </div>
+
+            {/* SKILLS SECTION */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-2.5 px-1">
+                <span className={`text-xs font-bold uppercase tracking-wider ${
+                  isDark ? 'text-slate-400' : 'text-slate-700'
+                }`}>
+                  Technical Skills & Learning
+                </span>
+                <span className={`text-[11px] font-medium ${
+                  isDark ? 'text-purple-300' : 'text-purple-900'
+                }`}>
+                  Core & Exploring
+                </span>
+              </div>
+
+              <div className="flex flex-wrap gap-2 justify-center">
+                {skills.map((skill) => {
+                  // Honest representation: highlight in-progress learning skills
+                  const isLearning = ["React", "Flutter", "Supabase"].includes(skill);
+
+                  return (
+                    <span
+                      key={skill}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 hover:-translate-y-0.5 shadow-sm ${
+                        isDark
+                          ? isLearning
+                            ? 'bg-purple-950/70 text-purple-200 border border-purple-500/40 hover:border-purple-400'
+                            : 'bg-white/10 text-slate-200 border border-white/15 hover:bg-white/20'
+                          : isLearning
+                            ? 'bg-purple-100 text-purple-900 border border-purple-300 hover:bg-purple-200'
+                            : 'bg-white/70 text-slate-800 border border-white/60 hover:bg-white'
+                      }`}
+                    >
+                      <span>{skill}</span>
+                      {isLearning && (
+                        <span className={`text-[10px] px-1 py-0.5 rounded font-normal opacity-80 ${
+                          isDark ? 'bg-purple-800 text-purple-100' : 'bg-purple-200 text-purple-800'
+                        }`}>
+                          learning
+                        </span>
+                      )}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ACTION BUTTONS: CONNECT & LIKE COUNTER */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+              
+              {/* CONNECT BUTTON */}
+              <button
+                onClick={toggleConnect}
+                className={`w-full py-3 px-4 rounded-xl font-bold text-sm tracking-wide transition-all duration-300 shadow-md flex items-center justify-center gap-2 active:scale-95 ${
+                  isConnected
+                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white ring-2 ring-emerald-400/50'
+                    : isDark
+                      ? 'bg-white text-slate-900 hover:bg-slate-100'
+                      : 'bg-slate-900 text-white hover:bg-slate-800'
+                }`}
+              >
+                {isConnected ? (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Connected</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>Connect</span>
+                  </>
+                )}
+              </button>
+
+              {/* LIKE BUTTON WITH COUNTER (+10 XP BONUS) */}
+              <button
+                onClick={handleLike}
+                className={`w-full py-3 px-4 rounded-xl font-bold text-sm tracking-wide bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-md transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 ${
+                  likeBump ? 'scale-105' : 'hover:scale-[1.02]'
+                }`}
+                title="Click to like and earn +10 XP"
+              >
+                <span className="text-base animate-pulse">❤️</span>
+                <span>Like</span>
+                <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs font-extrabold">
+                  {likes}
+                </span>
+                <span className="text-[10px] bg-rose-900/40 px-1.5 py-0.5 rounded text-rose-100 font-medium">
+                  +10 XP
+                </span>
+              </button>
+            </div>
+
+            {/* SOCIAL LINKS: GITHUB & LINKEDIN */}
+            <div className="flex items-center justify-center gap-3 pt-2">
+              {github && (
+                <a
+                  href={github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 shadow-sm ${
+                    isDark
+                      ? 'bg-white/10 hover:bg-white/20 text-white border border-white/10'
+                      : 'bg-white/70 hover:bg-white text-slate-900 border border-white/60'
+                  }`}
+                  aria-label="GitHub Profile"
+                >
+                  {/* GitHub SVG Icon */}
+                  <svg className="w-4 h-4 fill-currentColor" viewBox="0 0 24 24">
+                    <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+                  </svg>
+                  <span>GitHub</span>
+                </a>
+              )}
+
+              {linkedin && (
+                <a
+                  href={linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 shadow-sm ${
+                    isDark
+                      ? 'bg-white/10 hover:bg-white/20 text-white border border-white/10'
+                      : 'bg-white/70 hover:bg-white text-slate-900 border border-white/60'
+                  }`}
+                  aria-label="LinkedIn Profile"
+                >
+                  {/* LinkedIn SVG Icon */}
+                  <svg className="w-4 h-4 fill-currentColor" viewBox="0 0 24 24">
+                    <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9h2.79v8.37H6.46v-8.37M7.86 6.54a1.62 1.62 0 1 0 0 3.24 1.62 1.62 0 0 0 0-3.24z"/>
+                  </svg>
+                  <span>LinkedIn</span>
+                </a>
+              )}
+            </div>
+
+            {/* FOOTER & ASSIGNMENT CREDITS */}
+            <div className="mt-6 pt-5 border-t border-white/20 text-center">
+              <p className={`text-xs font-medium ${
+                isDark ? 'text-slate-400' : 'text-slate-700'
+              }`}>
+                ApnoAI Internship Task 2 &bull; React Profile Card
+              </p>
+              <p className={`text-[11px] mt-1 ${
+                isDark ? 'text-slate-500' : 'text-slate-600'
+              }`}>
+                Developed with React 18 &bull; Tailwind CSS &bull; Glassmorphism
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+      );
+    }
+
+    // =========================================================================
+    // ROOT RENDER WITH CUSTOM PROPS
+    // Demonstrates: Passing personal details as props to ProfileCard
+    // =========================================================================
+    const rootElement = document.getElementById('root');
+    const root = ReactDOM.createRoot(rootElement);
+
+    root.render(
+      <ProfileCard
+        name="Siva Sakthi P"
+        role="B.E. Computer Science Engineering Student (3rd Year)"
+        college="Paavai Engineering College"
+        location="Tenkasi, Tamil Nadu, India"
+        bio="I'm a Computer Science Engineering student interested in web development and software development. I enjoy learning new technologies and building practical projects to improve my programming skills."
+        skills={[
+          "HTML",
+          "CSS",
+          "JavaScript",
+          "Python",
+          "C",
+          "React",
+          "Flutter",
+          "Supabase"
+        ]}
+        avatar="./profile.jpg"
+        github="https://github.com/sivasakthi2007"
+        linkedin="https://www.linkedin.com/in/siva-sakthi-154466338"
+      />
+    );
+
+  </script>
+
+</body>
+</html>
+
